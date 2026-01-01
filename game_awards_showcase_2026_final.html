@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="The Game Awards 遊戲展示網站，展示年度最佳遊戲和 Steam 活動">
+    <title>The Game Awards - 遊戲展示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #4a4a4a;
+            --secondary-bg: #3a3a3a;
+            --accent-yellow: #ffed00;
+            --accent-white: #ffffff;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --border-color: #666666;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* 無障礙：跳過導航連結 */
+        .skip-to-main {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--accent-yellow);
+            color: #000;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        .skip-to-main:focus {
+            top: 0;
+        }
+
+        /* 導航欄 */
+        header {
+            background-color: var(--secondary-bg);
+            padding: 1rem 2rem;
+            border-bottom: 2px solid var(--accent-yellow);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--accent-yellow);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo:hover {
+            color: var(--accent-white);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover,
+        .nav-links a:focus {
+            color: var(--accent-yellow);
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        /* 主容器 */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* 標題區域 */
+        .hero {
+            margin-bottom: 3rem;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent-white);
+            font-weight: 700;
+        }
+
+        /* 搜尋和篩選 */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-box:focus {
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--accent-yellow);
+            color: var(--accent-yellow);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-btn:hover,
+        .filter-btn:focus {
+            background-color: var(--accent-yellow);
+            color: #000;
+            outline: 2px solid var(--accent-white);
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent-yellow);
+            color: #000;
+        }
+
+        /* 遊戲卡片網格 */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .game-card {
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(255, 237, 0, 0.2);
+        }
+
+        .game-card:focus-within {
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-white);
+            font-size: 3rem;
+            overflow: hidden;
+        }
+
+        .game-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 確保圖片完整顯示，不被裁切 */
+            background-color: #000; /* 填充黑色背景 */
+        }
+
+        .game-info {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--accent-yellow);
+        }
+
+        .game-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+
+        .game-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent-white);
+            margin-bottom: 1rem;
+        }
+
+        .buy-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-yellow);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .buy-btn:hover,
+        .buy-btn:focus {
+            background-color: var(--accent-white);
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        /* Steam 活動區域 */
+        .events-section {
+            margin-top: 3rem;
+        }
+
+        .events-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--accent-white);
+        }
+
+        .event-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease;
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(255, 237, 0, 0.15);
+        }
+
+        .event-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-white);
+            font-size: 2rem;
+            overflow: hidden;
+        }
+
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 確保圖片完整顯示，不被裁切 */
+            background-color: #000; /* 填充黑色背景 */
+        }
+
+        .event-info {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .event-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent-yellow);
+            margin-bottom: 0.75rem;
+        }
+
+        .event-description {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .event-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-yellow);
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+            font-size: 0.95rem;
+        }
+
+        .event-btn:hover,
+        .event-btn:focus {
+            background-color: var(--accent-white);
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        /* 頁腳 */
+        footer {
+            background-color: var(--secondary-bg);
+            padding: 2rem;
+            margin-top: 3rem;
+            border-top: 2px solid var(--accent-yellow);
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--accent-yellow);
+        }
+
+        .footer-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--accent-yellow);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover,
+        .footer-links a:focus {
+            color: var(--accent-white);
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .games-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1.5rem;
+            }
+
+            .event-card {
+                grid-template-columns: 1fr;
+            }
+
+            .event-image {
+                height: 150px;
+            }
+
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 1rem;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 1.5rem;
+            }
+
+            main {
+                padding: 1rem;
+            }
+
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* 無障礙：焦點可見性 */
+        *:focus {
+            outline: 2px solid var(--accent-yellow);
+            outline-offset: 2px;
+        }
+
+        /* 無障礙：減少動畫 */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* 無障礙：高對比度模式 */
+        @media (prefers-contrast: more) {
+            :root {
+                --primary-bg: #000000;
+                --secondary-bg: #1a1a1a;
+                --border-color: #ffffff;
+            }
+
+            .game-title,
+            .event-title,
+            .logo {
+                font-weight: 900;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 無障礙：跳過導航 -->
+    <a href="#main-content" class="skip-to-main">跳到主要內容</a>
+
+    <!-- 導航欄 -->
+    <header role="banner">
+        <nav role="navigation" aria-label="主導航">
+            <a href="#" class="logo" aria-label="The Game Awards 首頁">
+                ⚔️ THE GAME AWARDS
+            </a>
+            <ul class="nav-links">
+                <li><a href="#games" aria-label="前往遊戲列表">遊戲</a></li>
+                <li><a href="#events" aria-label="前往活動列表">活動</a></li>
+                <li><a href="#about" aria-label="關於我們">關於</a></li>
+                <li><a href="#contact" aria-label="聯絡我們">聯絡</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- 主要內容 -->
+    <main id="main-content">
+        <!-- 標題區域 -->
+        <section class="hero" aria-labelledby="hero-title">
+            <h1 id="hero-title">TGA 年度遊戲</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                探索 2026 年度最佳遊戲作品
+            </p>
+        </section>
+
+        <!-- 搜尋和篩選 -->
+        <section class="controls" aria-label="搜尋和篩選控制">
+            <input 
+                type="search" 
+                class="search-box" 
+                placeholder="搜尋遊戲..." 
+                aria-label="搜尋遊戲"
+            >
+            <div class="filter-buttons" role="group" aria-label="遊戲類別篩選">
+                <button class="filter-btn active" aria-pressed="true">全部</button>
+                <button class="filter-btn" aria-pressed="false">動作</button>
+                <button class="filter-btn" aria-pressed="false">冒險</button>
+                <button class="filter-btn" aria-pressed="false">角色扮演</button>
+            </div>
+        </section>
+
+        <!-- 遊戲卡片網格 -->
+        <section id="games" aria-labelledby="games-title">
+            <h2 id="games-title" style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--accent-yellow);">
+                精選遊戲
+            </h2>
+            <div class="games-grid" role="list">
+                <!-- 遊戲卡片 1 -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Overcooked 遊戲封面"><img src="assets/images/overcooked-card.jpg" alt="Overcooked 遊戲封面"></div>
+                    <div class="game-info">
+                        <h3 class="game-title">OVERCOOKED</h3>
+                        <p class="game-description">
+                            一款合作烹飪遊戲，考驗玩家的團隊合作能力
+                        </p>
+                        <p class="game-price">$ 19.99</p>
+                        <button class="buy-btn" aria-label="購買 Overcooked">購買</button>
+                    </div>
+                </article>
+
+                <!-- 遊戲卡片 2 -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Dead by Daylight 遊戲封面"><img src="assets/images/dead-by-daylight-card.jpg" alt="Dead by Daylight 遊戲封面"></div>
+                    <div class="game-info">
+                        <h3 class="game-title">DEAD BY DAYLIGHT</h3>
+                        <p class="game-description">
+                            非對稱多人恐怖遊戲，一人扮演殺手，其他人逃脫
+                        </p>
+                        <p class="game-price">$ 14.99</p>
+                        <button class="buy-btn" aria-label="購買 Dead by Daylight">購買</button>
+                    </div>
+                </article>
+
+                <!-- 遊戲卡片 3 -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Spiritfarer 遊戲封面"><img src="assets/images/spiritfarer-card.jpg" alt="Spiritfarer 遊戲封面"></div>
+                    <div class="game-info">
+                        <h3 class="game-title">SPIRITFARER</h3>
+                        <p class="game-description">
+                            溫馨的冒險遊戲，探索生死之間的故事
+                        </p>
+                        <p class="game-price">$ 17.99</p>
+                        <button class="buy-btn" aria-label="購買 Spiritfarer">購買</button>
+                    </div>
+                </article>
+
+                <!-- 遊戲卡片 4 -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Slay the Spire 遊戲封面"><img src="assets/images/slay-the-spire.jpg" alt="Slay the Spire 遊戲封面"></div>
+                    <div class="game-info">
+                        <h3 class="game-title">SLAY THE SPIRE</h3>
+                        <p class="game-description">
+                            獨特的卡牌構築遊戲，每次遊玩都有不同體驗
+                        </p>
+                        <p class="game-price">$ 24.99</p>
+                        <button class="buy-btn" aria-label="購買 Slay the Spire">購買</button>
+                    </div>
+                </article>
+
+                <!-- 遊戲卡片 5 -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Cyberpunk 遊戲封面"><img src="assets/images/cyberpunk.jpg" alt="Cyberpunk 遊戲封面"></div>
+                    <div class="game-info">
+                        <h3 class="game-title">CYBERPUNK</h3>
+                        <p class="game-description">
+                            未來都市冒險遊戲，探索高科技世界
+                        </p>
+                        <p class="game-price">$ 59.99</p>
+                        <button class="buy-btn" aria-label="購買 Cyberpunk">購買</button>
+                    </div>
+                </article>
+
+                <!-- 遊戲卡片 6 - 替換為 Baldur's Gate 3 -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Baldur's Gate 3 遊戲封面"><img src="assets/images/baldurs-gate-3.jpg" alt="Baldur's Gate 3 遊戲封面"></div>
+                    <div class="game-info">
+                    <h3 class="game-title">BALDUR'S GATE 3</h3>
+                    <p class="game-description">
+                            2023 TGA 年度遊戲。一款史詩級奇幻角色扮演遊戲，擁有豐富的劇情和極高的自由度。
+                        </p>
+                        <p class="game-price">$ 59.99</p>
+                        <button class="buy-btn" aria-label="購買 Baldur's Gate 3">購買</button>
+                    </div>
+                </article>
+
+                <!-- 遊戲卡片 7 - 替換為 Elden Ring -->
+                <article class="game-card" role="listitem">
+                    <div class="game-image" aria-label="Elden Ring 遊戲封面"><img src="assets/images/elden-ring-card.jpg" alt="Elden Ring 遊戲封面"></div>
+                    <div class="game-info">
+                        <h3 class="game-title">ELDEN RING</h3>
+                        <p class="game-description">
+                            2022 TGA 年度遊戲。一款開放世界動作角色扮演遊戲，以其高難度和宏大世界觀著稱。
+                        </p>
+                        <p class="game-price">$ 49.99</p>
+                        <button class="buy-btn" aria-label="購買 Elden Ring">購買</button>
+                    </div>
+                </article>
+
+                
+            </div>
+        </section>
+
+        <!-- Steam 活動區域 -->
+        <section id="events" class="events-section" aria-labelledby="events-title">
+            <h2 id="events-title">Steam 特別活動</h2>
+
+            <!-- 活動卡片 1 -->
+            <article class="event-card">
+                <div class="event-image" aria-label="秋季特賣活動"><img src="assets/images/steam-autumn-sale.jpg" alt="秋季特賣活動"></div>
+                <div class="event-info">
+                    <h3 class="event-title">秋季特賣活動</h3>
+                    <p class="event-description">
+                        精選遊戲享受高達 50% 的折扣，限時優惠不容錯過！
+                    </p>
+                    <button class="event-btn" aria-label="查看秋季特賣活動詳情">查看詳情</button>
+                </div>
+            </article>
+
+            <!-- 活動卡片 2 -->
+            <article class="event-card">
+                <div class="event-image" aria-label="即時策略節"><img src="assets/images/steam-strategy-fest.jpg" alt="即時策略節"></div>
+                <div class="event-info">
+                    <h3 class="event-title">即時策略節</h3>
+                    <p class="event-description">
+                        所有策略遊戲大特價，體驗戰術遊戲的樂趣。
+                    </p>
+                    <button class="event-btn" aria-label="查看即時策略節詳情">查看詳情</button>
+                </div>
+            </article>
+
+            <!-- 活動卡片 3 - 替換圖片 -->
+            <article class="event-card">
+                <div class="event-image" aria-label="獨立遊戲活動"><img src="assets/images/indie-games-banner.jpg" alt="獨立遊戲活動"></div>
+                <div class="event-info">
+                    <h3 class="event-title">獨立遊戲活動</h3>
+                    <p class="event-description">
+                        支持獨立開發者，發現優秀的小型遊戲作品。
+                    </p>
+                    <button class="event-btn" aria-label="查看獨立遊戲活動詳情">查看詳情</button>
+                </div>
+            </article>
+
+            <!-- 活動卡片 4 -->
+            <article class="event-card">
+                <div class="event-image" aria-label="STEAM 大獲"><img src="assets/images/steam-awards.jpg" alt="STEAM 大獲"></div>
+                <div class="event-info">
+                    <h3 class="event-title">STEAM 大獎</h3>
+                    <p class="event-description">
+                        投票選出您最喜愛的遊戲，贏取豐厚獎品。
+                    </p>
+                    <button class="event-btn" aria-label="參與 STEAM 大獎投票">投票參與</button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <!-- 頁腳 -->
+    <footer role="contentinfo">
+        <div class="footer-content">
+            <div class="footer-logo" aria-label="Steam 標誌">🎮</div>
+            <p class="footer-text">
+                © 2026 The Game Awards. 版權所有。
+            </p>
+            <nav class="footer-links" aria-label="頁腳導航">
+                <a href="#privacy" aria-label="隱私政策">隱私政策</a>
+                <a href="#terms" aria-label="使用條款">使用條款</a>
+                <a href="#contact" aria-label="聯絡我們">聯絡我們</a>
+                <a href="#sitemap" aria-label="網站地圖">網站地圖</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script>
+        // 搜尋功能
+        document.querySelector('.search-box').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const gameCards = document.querySelectorAll('.game-card');
+            
+            gameCards.forEach(card => {
+                const title = card.querySelector('.game-title').textContent.toLowerCase();
+                const description = card.querySelector('.game-description').textContent.toLowerCase();
+                
+                if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // 篩選按鈕功能
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-pressed', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-pressed', 'true');
+            });
+        });
+
+        // 購買按鈕功能
+        document.querySelectorAll('.buy-btn, .event-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                alert('感謝您的購買！這是一個演示網站。');
+            });
+        });
+
+        // 鍵盤導航支持
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelector('.search-box').blur();
+            }
+        });
+    </script>
+</body>
+</html>
